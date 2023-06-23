@@ -38,8 +38,7 @@ path_to_movie_conversations = os.path.join('movie_conversations.txt')
 MAX_SAMPLES = 50000
 from tensorflow import keras
 
-with keras.utils.CustomObjectScope({'MultiHeadAttention': CustomMultiHeadAttention}):
-    model = keras.models.load_model('DTLM_V4_model')
+
 
 
 
