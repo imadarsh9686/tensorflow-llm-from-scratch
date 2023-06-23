@@ -127,36 +127,42 @@ class MultiHeadAttention(tf.keras.layers.Layer):
 
     
   def split_heads(self, inputs, batch_size):
-    inputs = tf.reshape(inputs, shape=(batch_size, -1, self.num_heads, self.depth))
-    return tf.transpose(inputs, perm=[0, 2, 1, 3])
+      
+      inputs = tf.reshape(inputs, shape=(batch_size, -1, self.num_heads, self.depth))
+      return tf.transpose(inputs, perm=[0, 2, 1, 3])
+      
+    
 
   def call(self, inputs):
-    query, key, value, mask = inputs['query'], inputs['key'], inputs['value'], inputs['mask']
-    batch_size = tf.shape(query)[0]
-
-    # linear layers
-    query = self.query_dense(query)
-    key = self.key_dense(key)
-    value = self.value_dense(value)
-
-    # split heads
-    query = self.split_heads(query, batch_size)
-    key = self.split_heads(key, batch_size)
-    value = self.split_heads(value, batch_size)
-
-    # scaled dot-product attention
-    scaled_attention = scaled_dot_product_attention(query, key, value, mask)
-
-    scaled_attention = tf.transpose(scaled_attention, perm=[0, 2, 1, 3])
-
-    # concatenation of heads
-    concat_attention = tf.reshape(scaled_attention,
+      
+      query, key, value, mask = inputs['query'], inputs['key'], inputs['value'], inputs['mask']
+      batch_size = tf.shape(query)[0]
+    
+      # linear layers
+      query = self.query_dense(query)
+      key = self.key_dense(key)
+      value = self.value_dense(value)
+    
+      # split heads
+      query = self.split_heads(query, batch_size)
+      key = self.split_heads(key, batch_size)
+      value = self.split_heads(value, batch_size)
+    
+      # scaled dot-product attention
+      scaled_attention = scaled_dot_product_attention(query, key, value, mask)
+    
+      scaled_attention = tf.transpose(scaled_attention, perm=[0, 2, 1, 3])
+    
+      # concatenation of heads
+      concat_attention = tf.reshape(scaled_attention,
                                   (batch_size, -1, self.d_model))
-
-    # final linear layer
-    outputs = self.dense(concat_attention)
-
-    return outputs
+    
+      # final linear layer
+      outputs = self.dense(concat_attention)
+    
+      return outputs
+      
+    
     
     
     # Your custom implementation
