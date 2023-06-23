@@ -5,6 +5,7 @@ import tensorflow as tf
 import tensorflow_datasets as tfds
 assert tf.__version__.startswith('2')
 tf.random.set_seed(1234)
+from keras.utils import register_keras_serializable
 
 import os
 
@@ -171,7 +172,7 @@ def scaled_dot_product_attention(query, key, value, mask):
 
   return output
 
-
+@register_keras_serializable
 class MultiHeadAttention(tf.keras.layers.Layer):
 
   def __init__(self, d_model, num_heads, name="multi_head_attention"):
@@ -225,8 +226,11 @@ class MultiHeadAttention(tf.keras.layers.Layer):
 
 
 
+with keras.utils.CustomObjectScope({'MultiHeadAttention': MultiHeadAttention}):
+    
+    model = tf.keras.models.load_model('DTLM_V4_model')
 
-model = tf.keras.models.load_model('DTLM_V4_model')
+#model = tf.keras.models.load_model('DTLM_V4_model')
 
 def evaluate(sentence):
   sentence = preprocess_sentence(sentence)
