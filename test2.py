@@ -268,5 +268,5 @@ user_input = st.text_input('Input')
 
 
 if st.button('Send'):
-    output = predict("what's your name?")
+    output = predict(str(user_input))
     st.write(output)
