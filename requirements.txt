@@ -1,4 +1,4 @@
 
 tensorflow==2.11.0
 tensorflow-datasets==1.2.0
-protobuf==3.19.6
+protobuf==3.19.2
