@@ -16,22 +16,6 @@ import numpy as np
 
 MAX_LENGTH = 40
 
-path_to_zip = tf.keras.utils.get_file(
-    'cornell_movie_dialogs.zip',
-    origin=
-    'http://www.cs.cornell.edu/~cristian/data/cornell_movie_dialogs_corpus.zip',
-    extract=True)
-
-path_to_dataset = os.path.join(
-    os.path.dirname(path_to_zip), "cornell movie-dialogs corpus")
-
-path_to_movie_lines = os.path.join(path_to_dataset, 'movie_lines.txt')
-path_to_movie_conversations = os.path.join(path_to_dataset,
-                                           'movie_conversations.txt')
-
-
-
-
 path_to_movie_lines = os.path.join('movie_lines.txt')
 path_to_movie_conversations = os.path.join('movie_conversations.txt')
 
@@ -41,16 +25,7 @@ MAX_SAMPLES = 50000
 
 
 
-def create_padding_mask(x):
-  mask = tf.cast(tf.math.equal(x, 0), tf.float32)
-  # (batch_size, 1, 1, sequence length)
-  return mask[:, tf.newaxis, tf.newaxis, :]
 
-def create_look_ahead_mask(x):
-  seq_len = tf.shape(x)[1]
-  look_ahead_mask = 1 - tf.linalg.band_part(tf.ones((seq_len, seq_len)), -1, 0)
-  padding_mask = create_padding_mask(x)
-  return tf.maximum(look_ahead_mask, padding_mask)
 
 
 
@@ -107,6 +82,8 @@ START_TOKEN, END_TOKEN = [tokenizer.vocab_size], [tokenizer.vocab_size + 1]
 VOCAB_SIZE = tokenizer.vocab_size + 2
 
 
+
+
 # Tokenize, filter and pad sentences
 def tokenize_and_filter(inputs, outputs):
   tokenized_inputs, tokenized_outputs = [], []
@@ -153,84 +130,24 @@ dataset = dataset.batch(BATCH_SIZE)
 dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
 
 
-def scaled_dot_product_attention(query, key, value, mask):
-  """Calculate the attention weights. """
-  matmul_qk = tf.matmul(query, key, transpose_b=True)
-
-  # scale matmul_qk
-  depth = tf.cast(tf.shape(key)[-1], tf.float32)
-  logits = matmul_qk / tf.math.sqrt(depth)
-
-  # add the mask to zero out padding tokens
-  if mask is not None:
-    logits += (mask * -1e9)
-
-  # softmax is normalized on the last axis (seq_len_k)
-  attention_weights = tf.nn.softmax(logits, axis=-1)
-
-  output = tf.matmul(attention_weights, value)
-
-  return output
-
-
-class MultiHeadAttention(tf.keras.layers.Layer):
-
-  def __init__(self, d_model, num_heads, name="multi_head_attention"):
-    super(MultiHeadAttention, self).__init__(name=name)
-    self.num_heads = num_heads
-    self.d_model = d_model
-
-    assert d_model % self.num_heads == 0
-
-    self.depth = d_model // self.num_heads
-
-    self.query_dense = tf.keras.layers.Dense(units=d_model)
-    self.key_dense = tf.keras.layers.Dense(units=d_model)
-    self.value_dense = tf.keras.layers.Dense(units=d_model)
-
-    self.dense = tf.keras.layers.Dense(units=d_model)
-
-  def split_heads(self, inputs, batch_size):
-    inputs = tf.reshape(
-        inputs, shape=(batch_size, -1, self.num_heads, self.depth))
-    return tf.transpose(inputs, perm=[0, 2, 1, 3])
-
-  def call(self, inputs):
-    query, key, value, mask = inputs['query'], inputs['key'], inputs[
-        'value'], inputs['mask']
-    batch_size = tf.shape(query)[0]
-
-    # linear layers
-    query = self.query_dense(query)
-    key = self.key_dense(key)
-    value = self.value_dense(value)
-
-    # split heads
-    query = self.split_heads(query, batch_size)
-    key = self.split_heads(key, batch_size)
-    value = self.split_heads(value, batch_size)
-
-    # scaled dot-product attention
-    scaled_attention = scaled_dot_product_attention(query, key, value, mask)
-
-    scaled_attention = tf.transpose(scaled_attention, perm=[0, 2, 1, 3])
-
-    # concatenation of heads
-    concat_attention = tf.reshape(scaled_attention,
-                                  (batch_size, -1, self.d_model))
-
-    # final linear layer
-    outputs = self.dense(concat_attention)
-
-    return outputs
 
 
 
-with keras.utils.CustomObjectScope({'MultiHeadAttention': MultiHeadAttention}):
-    
-    model = tf.keras.models.load_model('DTLM_V4_model')
+      
+def create_padding_mask(x):
+  mask = tf.cast(tf.math.equal(x, 0), tf.float32)
+  # (batch_size, 1, 1, sequence length)
+  return mask[:, tf.newaxis, tf.newaxis, :]
 
-#model = tf.keras.models.load_model('DTLM_V4_model')
+def create_look_ahead_mask(x):
+  seq_len = tf.shape(x)[1]
+  look_ahead_mask = 1 - tf.linalg.band_part(tf.ones((seq_len, seq_len)), -1, 0)
+  padding_mask = create_padding_mask(x)
+  return tf.maximum(look_ahead_mask, padding_mask)
+
+
+model = tf.keras.models.load_model('DTLM_V4_model')
+
 
 def evaluate(sentence):
   sentence = preprocess_sentence(sentence)
