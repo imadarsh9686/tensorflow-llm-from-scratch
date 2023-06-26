@@ -1,6 +1,7 @@
 pip==23.1.2
 streamlit
-tensorflow-gpu
+tensorflow-gpu==2.7.0
+
 tensorflow-tensorrt
 
 tensorflow==2.11.0
