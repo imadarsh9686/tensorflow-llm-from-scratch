@@ -4,6 +4,8 @@ import re
 import tensorflow as tf
 import tensorflow_datasets as tfds
 #assert tf.__version__.startswith('2')
+assert tf.__version__.startswith('2'), "TensorFlow version 2.x is required"
+tf.config.set_visible_devices([], 'GPU')
 tf.random.set_seed(1234)
 from tensorflow import keras
 
