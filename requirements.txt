@@ -1,8 +1,8 @@
 pip==23.1.2
 streamlit
-#tensorflow-gpu==2.7.0
+tensorflow-gpu==2.7.0
 
-#tensorflow-tensorrt
+tensorflow-tensorrt
 
 tensorflow==2.11.0
 tensorflow-datasets==1.2.0
