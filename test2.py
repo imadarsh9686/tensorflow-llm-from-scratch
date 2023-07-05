@@ -217,7 +217,7 @@ def create_look_ahead_mask(x):
 
 with keras.utils.CustomObjectScope({'MultiHeadAttention': MultiHeadAttention}):
     
-    model = tf.keras.models.load_model('DTLM_V4_model')
+    model = tf.keras.models.load_model('DTLM_V6_model')
 
 #model = tf.keras.models.load_model('DTLM_V4_model')
 
